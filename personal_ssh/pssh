@@ -1,0 +1,97 @@
+#!/bin/zsh
+
+UTILITY_SCRIPTS_DATA_DIR="$HOME/.utility_scripts"
+PERSONAL_SSH_DIR="$UTILITY_SCRIPTS_DATA_DIR/personal_ssh"
+IP_ADDRESS_FILE="$PERSONAL_SSH_DIR/ip_address.txt"
+ERROR_FILE="$PERSONAL_SSH_DIR/error.txt"
+
+create_personal_ssh_dir() {
+  if [ ! -d "$PERSONAL_SSH_DIR" ]; then
+    mkdir -p "$PERSONAL_SSH_DIR"
+  fi
+}
+create_personal_ssh_dir
+
+get_saved_ip_address() {
+  if [ -f "$IP_ADDRESS_FILE" ]; then
+    ip_addresses=$(cat "$IP_ADDRESS_FILE")
+    echo "$ip_addresses"
+  fi
+}
+
+save_ip_address() {
+  echo $1 > "$IP_ADDRESS_FILE"
+}
+
+connect_to_ip_address() {
+  ssh -o ConnectTimeout=10 -i ~/.ssh/mac-mini_ssh warathep@"$1"
+}
+
+scan_for_ip_address() {
+  nmap_result=$(nmap -p 22 --open -sV 192.168.1.0/24 2>/dev/null)
+  ip_address=$(echo "$nmap_result" | grep "Nmap scan report for warathep-macmini6-2" | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}')
+  echo "$ip_address"
+}
+
+check_error() {
+  if [ -f "$ERROR_FILE" ]; then
+    error=$(cat "$ERROR_FILE")
+    echo "$error"
+  fi
+}
+
+save_error() {
+  echo $1 > "$ERROR_FILE"
+}
+
+clear_error() {
+  rm -f "$ERROR_FILE"
+}
+
+if [ -n "$(check_error)" ]; then
+  echo "Scanning for SSH services on local network..."
+  ip_address=$(scan_for_ip_address)
+  if [ -z "$ip_address" ]; then
+    echo "No IP address found"
+    save_error "No IP address found"
+    exit 1
+  fi
+  clear_error
+  save_ip_address "$ip_address"
+  echo -en "\a" # Play sound
+  connect_to_ip_address "$ip_address"
+  if [ $? -eq 255 ]; then # SSH connection failed
+    save_error "Failed to connect to $ip_address"
+    exit 1
+  fi
+  exit 0
+fi
+
+ip_address=$(get_saved_ip_address)
+if [ -z "$ip_address" ]; then
+  echo "Scanning for SSH services on local network..."
+  ip_address=$(scan_for_ip_address)
+  if [ -z "$ip_address" ]; then
+    echo "No IP address found"
+    save_error "No IP address found"
+    exit 1
+  fi
+  save_ip_address "$ip_address"
+  clear_error
+  echo -en "\a" # Play sound
+  connect_to_ip_address "$ip_address"
+  if [ $? -eq 255 ]; then # SSH connection failed
+    save_error "Failed to connect to $ip_address"
+    exit 1
+  fi
+else
+  echo "Attempting to connect to saved IP address: $ip_address"
+  echo -en "\a" # Play sound
+  connect_to_ip_address "$ip_address"
+  if [ $? -eq 255 ]; then # SSH connection failed
+    save_error "Failed to connect to $ip_address"
+    exit 1
+  fi
+fi
+
+exit 0
