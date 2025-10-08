@@ -1,0 +1,11 @@
+#!/bin/zsh
+
+fakejt_up() {
+  echo "Fake JobThai Up"
+  (cd "$HOME/Developer/THiNKNET/jobthai/oauth-client-fake-jobthai-app" && docker-compose up -d)
+}
+
+fakejt_down() {
+  echo "Fake JobThai Down"
+  (cd "$HOME/Developer/THiNKNET/jobthai/oauth-client-fake-jobthai-app" && docker-compose down)
+}
