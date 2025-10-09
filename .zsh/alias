@@ -1,0 +1,28 @@
+#!/bin/zsh
+
+# General aliases
+alias crs='cursor'
+alias air='$(go env GOPATH)/bin/air'
+alias lzd='lazydocker'
+alias oll='ollama'
+alias ngrok-domain='ngrok http --url https://firefly-ethical-remotely.ngrok-free.app'
+
+# Docker aliases
+alias dcu='docker-compose up'
+alias dcd='docker-compose down'
+alias dps='docker-compose ps'
+
+# Navigation aliases
+alias cdtn="$HOME/Developer/THiNKNET"
+alias cdjt="$HOME/Developer/THiNKNET/jobthai"
+alias cdmp="$HOME/Developer/MyProjects"
+alias cdpg="$HOME/Developer/Playground"
+alias cdyt="$HOME/Developer/Youtube"
+alias cdud="$HOME/Developer/UdemyCourses"
+alias cdsc="$HOME/Developer/Scripts"
+alias cdb="$HOME/Developer/Books"
+
+# Git aliases
+alias gcamwm="cat .git/MERGE_MSG | xargs -I M git commit -am M"
+alias gcpb="git branch --show-current | pbcopy"
+alias gstawm="gsta -m"
